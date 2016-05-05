@@ -18,7 +18,6 @@ D=$PWD
     BG_tm1_ArchiveDir=/glade/scratch/jfyke/archive/$BG_CaseName_Root$tm1
 
 ###set up model
-    remove_runs.sh $CaseName
     #Set the source code from which to build model
     CCSMRoot=/glade/u/home/jfyke/work/CESM_model_versions/cesm1_5_beta05
     #Create new experiment setup
@@ -30,7 +29,7 @@ D=$PWD
 					   -project P93300301
     #Change directories into the new experiment case directory
     cd $D/$CaseName
-        
+    
     ./xmlchange RUN_TYPE='hybrid'
     #Set primary restart-gathering names
     ./xmlchange RUN_REFCASE=$JG_CaseName_Root$t
@@ -115,23 +114,23 @@ D=$PWD
     ./xmlchange STOP_OPTION='nyears'
     ./xmlchange STOP_N=1
     ./xmlchange RESUBMIT=0
-    ./xmlchange JOB_QUEUE='premium'
-    ./xmlchange JOB_WALLCLOCK_TIME='03:00'
+    ./xmlchange JOB_QUEUE='regular'
+    ./xmlchange JOB_WALLCLOCK_TIME='04:00'
     ./xmlchange PROJECT='P93300301'    
 
 ###make some soft links for convenience
     ln -s $BG_t_RunDir RunDir
-    ArchiveDir=/glade/scratch/jfyke/archive/$CaseName
-    ln -s $ArchiveDir ArchiveDir
+    ln -s /glade/scratch/jfyke/archive/$CaseName ArchiveDir
 
-###build and submit
+###build
 ./case.build
 
 ###run dynamic topography update to bring CAM topography up to JG-generated topography before starting
-#cd $CAM_topo_regen_dir
-#./CAM_topo_regen.sh
-#cd $D/$CaseName
+cd $CAM_topo_regen_dir
+./CAM_topo_regen.sh
+cd $D/$CaseName
 
+###submit
 ./case.submit
 
 

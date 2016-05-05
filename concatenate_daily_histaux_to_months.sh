@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CaseName=BG_iteration_0
+CaseName=BG_iteration_1_switch_to_CAM54_midstream
 SD=/glade/scratch/jfyke/archive/$CaseName/cpl/hist
 
 for yr in `seq -f '%04g' 1 1`; do 
