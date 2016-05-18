@@ -2,8 +2,7 @@
 
 D=$PWD
 
-#NOTE: ice acceleration is ON
-#NOTE: TODO: stop all mosart .h. files from being copied over during wildcard copy
+#NOTE: ice acceleration is OFF
 
 ###build up CaseNames, RunDirs, Archive Dirs, etc.
     t=4
@@ -11,20 +10,17 @@ D=$PWD
 
     BG_CaseName_Root=BG_iteration_
     JG_CaseName_Root=JG_iteration_
-    BG_Restart_Year_Short=16
+    BG_Restart_Year_Short=15
     BG_Restart_Year=`printf %04d $BG_Restart_Year_Short`
-    BG_Forcing_Year_Start=5
-    let BG_Forcing_Year_End=BG_Restart_Year_Short-1
+    BG_Forcing_Year_Start=15
+    let BG_Forcing_Year_End=15
     
     #Need to also change DATM_CPLHIST_YR_[START/END] below.  I think 'align' needs to be same as BG_Restart_Year, but without padded zeros
     #Set name of simulation
-    CaseName=$JG_CaseName_Root$t
+    CaseName=$JG_CaseName_Root"$t"_rewind_test
     PreviousBGCaseName="$BG_CaseName_Root""$tm1"
     JG_t_RunDir=/glade/scratch/jfyke/$CaseName/run
     BG_tm1_ArchiveDir=/glade/scratch/jfyke/$PreviousBGCaseName/run
-
-###set project code
-    ProjCode=P93300301
     
 ###set up model
     #Set the source code from which to build model
@@ -35,7 +31,7 @@ D=$PWD
 					  -user_pes_setby allactive \
 					  -res f09_g16_gl4 \
 					  -mach yellowstone\
-					  -project $ProjCode
+					  -project P93300601
 
     #Change directories into the new experiment case directory
     cd $D/$CaseName
@@ -116,7 +112,7 @@ D=$PWD
     echo 'glissade_maxiter=50' >> user_nl_cism
 
     #accelerate ice sheet
-    echo 'ice_tstep_multiply=10' >> user_nl_cism 
+    #echo 'ice_tstep_multiply=10' >> user_nl_cism 
 
 ###configure POP
     #Turn off precipitation scaling in POP for JG runs
@@ -159,6 +155,7 @@ D=$PWD
     GLOBIGNORE=*.cam.*:rpointer.atm #Don't copy over any atmospheric restart stuff.
     #cp $BG_tm1_ArchiveDir/rest/0002-01-01-00000/* $JG_t_RunDir
     cp $BG_tm1_ArchiveDir/rpointer.* $JG_t_RunDir
+    sed -i s/16/15/g $JG_t_RunDir/rpointer.*
     cp $BG_tm1_ArchiveDir/$PreviousBGCaseName.*r*$BG_Restart_Year* $JG_t_RunDir
     cp $BG_tm1_ArchiveDir/$PreviousBGCaseName.cism.h."$BG_Restart_Year"-01-01-00000.nc $JG_t_RunDir 
     cp $BG_tm1_ArchiveDir/$PreviousBGCaseName.cpl.hi."$BG_Restart_Year"-01-01-00000.nc $JG_t_RunDir    
@@ -174,10 +171,10 @@ D=$PWD
     ./xmlchange STOP_N=1
     ./xmlchange HIST_OPTION='nmonths'
     ./xmlchange HIST_N=1
-    ./xmlchange RESUBMIT=20
+    ./xmlchange RESUBMIT=0
     ./xmlchange JOB_QUEUE='small'
-    ./xmlchange JOB_WALLCLOCK_TIME='00:40'
-    ./xmlchange PROJECT="$ProjCode"
+    ./xmlchange JOB_WALLCLOCK_TIME='00:30'
+    ./xmlchange PROJECT='P93300301'
 
 ###make some soft links for convenience 
     ln -sf $JG_t_RunDir RunDir
