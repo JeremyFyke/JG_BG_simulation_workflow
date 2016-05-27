@@ -2,12 +2,8 @@
 
 D=$PWD
 
-echo 'NOTE: ice acceleration is ON'
-echo 'TODO: stop all mosart .h. files from being copied over during wildcard copy.  Follow precedent of BG runscript'
-echo 'TODO: do explicit restart copying (no wildcards).  Follow precedent of BG runscript'
-echo 'See if this dies after 1 year of running, under BG_iteration_4.  Figure out why if so.'
-echo 'Test to see if update to offset and change to linear interpolation in Solar worked, in comparing climatological distributions'
-exit
+#NOTE: ice acceleration is ON
+#NOTE: TODO: stop all mosart .h. files from being copied over during wildcard copy
 
 ###build up CaseNames, RunDirs, Archive Dirs, etc.
     t=4
@@ -15,13 +11,14 @@ exit
 
     BG_CaseName_Root=BG_iteration_
     JG_CaseName_Root=JG_iteration_
-    BG_Restart_Year_Short=XXX
+    BG_Restart_Year_Short=16
     BG_Restart_Year=`printf %04d $BG_Restart_Year_Short`
-    BG_Forcing_Year_Start=XXX
+    BG_Forcing_Year_Start=5
     let BG_Forcing_Year_End=BG_Restart_Year_Short-1
     
+    #Need to also change DATM_CPLHIST_YR_[START/END] below.  I think 'align' needs to be same as BG_Restart_Year, but without padded zeros
     #Set name of simulation
-    CaseName=$JG_CaseName_Root"$t"
+    CaseName="$JG_CaseName_Root""$t"_Solar_offset_to_0
     PreviousBGCaseName="$BG_CaseName_Root""$tm1"
     JG_t_RunDir=/glade/scratch/jfyke/$CaseName/run
     BG_tm1_ArchiveDir=/glade/scratch/jfyke/$PreviousBGCaseName/run
@@ -177,8 +174,8 @@ exit
     ./xmlchange STOP_N=1
     ./xmlchange HIST_OPTION='nmonths'
     ./xmlchange HIST_N=1
-    ./xmlchange RESUBMIT=20
-    ./xmlchange JOB_QUEUE='regular'
+    ./xmlchange RESUBMIT=0
+    ./xmlchange JOB_QUEUE='premium'
     ./xmlchange JOB_WALLCLOCK_TIME='00:40'
     ./xmlchange PROJECT="$ProjCode"
 

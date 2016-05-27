@@ -466,7 +466,7 @@ module cesm_comp_mod
                                         &Faxa_ocphodry:Faxa_dstwet1:Faxa_dstdry1:Faxa_dstwet2:Faxa_dstdry2:Faxa_dstwet3:&
                                         &Faxa_dstdry3:Faxa_dstwet4:Faxa_dstdry4:Sa_co2prog:Sa_co2diag:Sa_topo'
    character(CL) :: hist_a2x1hri_flds = 'Faxa_swndr:Faxa_swvdr:Faxa_swndf:Faxa_swvdf'
-   character(CL) :: hist_a2x1hr_flds  = 'Sa_u:Sa_v'
+   character(CL) :: hist_a2x1hr_flds  = 'Sa_u:Sa_v:Faxa_swndr:Faxa_swvdr:Faxa_swndf:Faxa_swvdf'
    character(CL) :: hist_a2x3hrp_flds = 'Faxa_rainc:Faxa_rainl:Faxa_snowc:Faxa_snowl'
    character(CL) :: hist_a2x3hr_flds  = 'Sa_z:Sa_tbot:Sa_ptem:Sa_shum:Sa_dens:Sa_pbot:Sa_pslv:Faxa_lwdn:&
         &Faxa_rainc:Faxa_rainl:Faxa_snowc:Faxa_snowl'

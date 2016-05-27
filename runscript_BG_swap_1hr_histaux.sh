@@ -1,8 +1,5 @@
 #!/bin/bash
 
-echo 'TODO: remove tailor custom code to slide in Marcuss ocean restart'
-exit
-
 D=$PWD
 
 ###build up CaseNames, RunDirs, Archive Dirs, etc.
@@ -15,7 +12,7 @@ D=$PWD
     BG_Restart_Year=0016
     JG_Restart_Year=0021
 
-    CaseName=$BG_CaseName_Root"$t"
+    CaseName=$BG_CaseName_Root"$t"_swap_1hr_histaux
     PreviousJGCaseName=$JG_CaseName_Root"$t"
     PreviousBGCaseName="$BG_CaseName_Root""$tm1"
        
@@ -66,16 +63,16 @@ D=$PWD
    
 ###enable custom coupler output
     #Copy in necessary mods and settings to enable necessary coupler output for subsequent JG run
-    cp $D/SourceMods/cesm_comp_mod.F90 SourceMods/src.drv
-    cp $D/SourceMods/seq_infodata_mod.F90 SourceMods/src.share
-    cp $D/SourceMods/seq_domain_mct.F90 SourceMods/src.drv    
+    cp $D/SourceMods_swap_1hr_histaux/cesm_comp_mod.F90 SourceMods/src.drv
+    cp $D/SourceMods_swap_1hr_histaux/seq_infodata_mod.F90 SourceMods/src.share
+    cp $D/SourceMods_swap_1hr_histaux/seq_domain_mct.F90 SourceMods/src.drv    
     echo 'histaux_a2x3hr = .true.' > user_nl_cpl
     echo 'histaux_a2x24hr = .true.' >> user_nl_cpl
     echo 'histaux_a2x1hri = .true.' >> user_nl_cpl
     echo 'histaux_a2x1hr = .true.' >> user_nl_cpl
 
 ####copy in BHLV downscaling fix and switch to bilinear LND2GLC mapping to override bad conservative downscaling
-    cp $D/SourceMods/map_lnd2glc_mod.F90 SourceMods/src.drv
+    cp $D/SourceMods_swap_1hr_histaux/map_lnd2glc_mod.F90 SourceMods/src.drv
     ./xmlchange LND2GLC_FMAPNAME="cpl/gridmaps/fv0.9x1.25/map_fv0.9x1.25_TO_gland4km_blin.150514.nc"
 
 ###configure CAM
@@ -168,6 +165,8 @@ D=$PWD
 ###set component-specific restarting tweaks that aren't handled by default scripts for this scenario
     #CAM
     #overwrite default script-generated restart info with custom values, to represent the migrated CAM restart file
+        #echo "bnd_topo='/glade/scratch/jfyke/Marcus_temporary_CAM5.4_input_files/fg.c15b02fv1_test_dynTopo.cam.r.0002-01-01-00000.nc'" > user_nl_cam
+        #echo "ncdata='/glade/scratch/jfyke/Marcus_temporary_CAM5.4_input_files/fg.c15b02fv1_test_dynTopo.cam.i.0002-01-01-00000.nc'" >> user_nl_cam
 	echo "bnd_topo='$BG_t_RunDir/$PreviousBGCaseName.cam.r.$BG_Restart_Year-01-01-00000.nc'" > user_nl_cam
         echo "ncdata='$BG_t_RunDir/$PreviousBGCaseName.cam.i.$BG_Restart_Year-01-01-00000.nc'" >> user_nl_cam
     #for a hybrid run, tack on landm_coslat, landfrac to cam.r. (since this is being used as the topography file)
@@ -181,7 +180,7 @@ D=$PWD
 ###configure submission length and restarting
     ./xmlchange STOP_OPTION='nyears'
     ./xmlchange STOP_N=1
-    ./xmlchange RESUBMIT=39
+    ./xmlchange RESUBMIT=0
     ./xmlchange JOB_QUEUE='regular'
     ./xmlchange JOB_WALLCLOCK_TIME='04:00'
     ./xmlchange PROJECT='P93300301'    
@@ -194,10 +193,10 @@ D=$PWD
 ./case.build
 
 ###run dynamic topography update to bring CAM topography up to JG-generated topography before starting
-cd $CAM_topo_regen_dir
-export RUNDIR=$BG_t_RunDir
-./CAM_topo_regen.sh
-cd $D/$CaseName
+#cd $CAM_topo_regen_dir
+#export RUNDIR=$BG_t_RunDir
+#./CAM_topo_regen.sh
+#cd $D/$CaseName
 
 ###submit
 ./case.submit

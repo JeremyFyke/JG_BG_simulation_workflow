@@ -2,12 +2,8 @@
 
 D=$PWD
 
-echo 'NOTE: ice acceleration is ON'
-echo 'TODO: stop all mosart .h. files from being copied over during wildcard copy.  Follow precedent of BG runscript'
-echo 'TODO: do explicit restart copying (no wildcards).  Follow precedent of BG runscript'
-echo 'See if this dies after 1 year of running, under BG_iteration_4.  Figure out why if so.'
-echo 'Test to see if update to offset and change to linear interpolation in Solar worked, in comparing climatological distributions'
-exit
+#NOTE: ice acceleration is ON
+#NOTE: DEBUG IS TRUE!
 
 ###build up CaseNames, RunDirs, Archive Dirs, etc.
     t=4
@@ -15,13 +11,13 @@ exit
 
     BG_CaseName_Root=BG_iteration_
     JG_CaseName_Root=JG_iteration_
-    BG_Restart_Year_Short=XXX
+    BG_Restart_Year_Short=16
     BG_Restart_Year=`printf %04d $BG_Restart_Year_Short`
-    BG_Forcing_Year_Start=XXX
+    BG_Forcing_Year_Start=5
     let BG_Forcing_Year_End=BG_Restart_Year_Short-1
     
     #Set name of simulation
-    CaseName=$JG_CaseName_Root"$t"
+    CaseName=$JG_CaseName_Root"$t"_MultDecWFixedOffset
     PreviousBGCaseName="$BG_CaseName_Root""$tm1"
     JG_t_RunDir=/glade/scratch/jfyke/$CaseName/run
     BG_tm1_ArchiveDir=/glade/scratch/jfyke/$PreviousBGCaseName/run
@@ -93,6 +89,8 @@ exit
 
     ./xmlchange CPL_ALBAV='false'
     ./xmlchange CPL_EPBAL='off'
+
+    ./xmlchange DEBUG=TRUE
 
     ./case.setup				      
 
@@ -173,15 +171,19 @@ exit
     echo "ice_ic='$JG_t_RunDir/$PreviousBGCaseName.cice.r.$BG_Restart_Year-01-01-00000.nc'" > user_nl_cice
 
 ###configure submission length, diagnostic CPL history output, and restarting
-    ./xmlchange STOP_OPTION='nyears'
-    ./xmlchange STOP_N=1
+    ./xmlchange STOP_OPTION='ndays'
+    ./xmlchange STOP_N=5
     ./xmlchange HIST_OPTION='nmonths'
     ./xmlchange HIST_N=1
-    ./xmlchange RESUBMIT=20
+    ./xmlchange RESUBMIT=2
     ./xmlchange JOB_QUEUE='regular'
     ./xmlchange JOB_WALLCLOCK_TIME='00:40'
     ./xmlchange PROJECT="$ProjCode"
 
+###copy extra SourceMods
+    cp $D/SourceMods/cesm_comp_mod.F90 SourceMods/src.drv
+    cp $D/SourceMods/seq_infodata_mod.F90 SourceMods/src.share
+    
 ###make some soft links for convenience 
     ln -sf $JG_t_RunDir RunDir
     ln -sf /glade/scratch/jfyke/archive/$CaseName ArchiveDir
