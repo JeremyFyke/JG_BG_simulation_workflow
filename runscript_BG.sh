@@ -1,19 +1,16 @@
 #!/bin/bash
 
-echo 'TODO: remove tailor custom code to slide in Marcuss ocean restart'
-exit
-
 D=$PWD
 
 ###build up CaseNames, RunDirs, Archive Dirs, etc.
-    t=4
+    t=5
     let tm1=t-1
 
     BG_CaseName_Root=BG_iteration_
     JG_CaseName_Root=JG_iteration_
 
-    BG_Restart_Year=0016
-    JG_Restart_Year=0021
+    BG_Restart_Year=0040
+    JG_Restart_Year=0035
 
     CaseName=$BG_CaseName_Root"$t"
     PreviousJGCaseName=$JG_CaseName_Root"$t"
@@ -144,26 +141,17 @@ D=$PWD
     f=$JG_t_RunDir/rpointer.ocn.restart;                                              cp -vf $f $BG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
     f=$JG_t_RunDir/rpointer.rof;                                                      cp -vf $f $BG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
 
+    #Ensure dates of non-CAM restarts are correct (can be wrong if year previous to final year of JG run is used)
+    sed -i "s/[0-9]\{4\}-01-01-00000/"$JG_Restart_Year"-01-01-00000/g" $BG_t_RunDir/rpointer.*
+
+    #Then copy over CAM restarts
     f=$BG_tm1_RunDir/$PreviousBGCaseName.cam.r.$BG_Restart_Year-01-01-00000.nc;  cp -vf $f $BG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
     f=$BG_tm1_RunDir/$PreviousBGCaseName.cam.rs.$BG_Restart_Year-01-01-00000.nc; cp -vf $f $BG_t_RunDir || { echo "copy of $f failed" ; exit 1; }    
-    f=$BG_tm1_RunDir/$PreviousBGCaseName.cam.i.$BG_Restart_Year-01-01-00000.nc;  cp -vf $f $BG_t_RunDir || { echo "copy of $f failed" ; exit 1; } 
+    f=$BG_tm1_RunDir/$PreviousBGCaseName.cam.i.$BG_Restart_Year-01-01-00000.nc;  cp -vf $f $BG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
     f=$BG_tm1_RunDir/rpointer.atm;                                               cp -vf $f $BG_t_RunDir || { echo "copy of $f failed" ; exit 1; }  
 
     #Ensure dates are correct (can be wrong if year previous to final year of JG run is used)
-    sed -i "s/[0-9]\{4\}-01-01-00000/"$JG_Restart_Year"-01-01-00000/g" $BG_t_RunDir/rpointer.*
-    
-    #TEMPORARY: SLIDE IN MARCUS'S LE SPIN-UP OCN RESTART
-	rm -v $BG_t_RunDir/$PreviousJGCaseName.pop.r."$JG_Restart_Year"-01-01-00000.nc    
-	rm -v $BG_t_RunDir/$PreviousJGCaseName.pop.ro."$JG_Restart_Year"-01-01-00000
-	rm -v $BG_t_RunDir/rpointer.ocn.ovf
-	rm -v $BG_t_RunDir/rpointer.ocn.restart
-
-	MarcusDir=/glade/u/home/marcusl/archive/bg.c15b06fv1_spinup0/rest/0100-01-01-00000
-	cp -v $MarcusDir/bg.c15b06fv1_spinup0.pop.r.0100-01-01-00000.nc $BG_t_RunDir || { echo "copy of Marcus file failed" ; exit 1; }
-	cp -v $MarcusDir/bg.c15b06fv1_spinup0.pop.ro.0100-01-01-00000 $BG_t_RunDir || { echo "copy of Marcus file failed" ; exit 1; }
-	cp -v $MarcusDir/rpointer.ocn.ovf $BG_t_RunDir || { echo "copy of Marcus file failed" ; exit 1; }
-	cp -v $MarcusDir/rpointer.ocn.restart $BG_t_RunDir  || { echo "copy of Marcus file failed" ; exit 1; }
-    #TEMPORARY ENDS
+    sed -i "s/[0-9]\{4\}-01-01-00000/"$BG_Restart_Year"-01-01-00000/g" $BG_t_RunDir/rpointer.atm
     
 ###set component-specific restarting tweaks that aren't handled by default scripts for this scenario
     #CAM
@@ -178,6 +166,10 @@ D=$PWD
     #overwrite default script-generated ice_ice file name (bug in setup scripts?)
         echo "ice_ic='$BG_t_RunDir/$PreviousJGCaseName.cice.r.$JG_Restart_Year-01-01-00000.nc'" > user_nl_cice
 
+###turn on CPL history output
+    ./xmlchange HIST_OPTION='nmonths'
+    ./xmlchange HIST_N=1
+
 ###configure submission length and restarting
     ./xmlchange STOP_OPTION='nyears'
     ./xmlchange STOP_N=1
@@ -189,6 +181,9 @@ D=$PWD
 ###make some soft links for convenience
     ln -s $BG_t_RunDir RunDir
     ln -s /glade/scratch/jfyke/archive/$CaseName ArchiveDir
+
+###copy esp_present=wav_present bugfix
+    cp -vf $D/SourceMods/seq_rest_mod.F90 SourceMods/src.drv
 
 ###build
 ./case.build

@@ -2,22 +2,15 @@
 
 D=$PWD
 
-echo 'NOTE: ice acceleration is ON'
-echo 'TODO: stop all mosart .h. files from being copied over during wildcard copy.  Follow precedent of BG runscript'
-echo 'TODO: do explicit restart copying (no wildcards).  Follow precedent of BG runscript'
-echo 'See if this dies after 1 year of running, under BG_iteration_4.  Figure out why if so.'
-echo 'Test to see if update to offset and change to linear interpolation in Solar worked, in comparing climatological distributions'
-exit
-
 ###build up CaseNames, RunDirs, Archive Dirs, etc.
-    t=4
+    t=6
     let tm1=t-1
 
     BG_CaseName_Root=BG_iteration_
     JG_CaseName_Root=JG_iteration_
-    BG_Restart_Year_Short=XXX
+    BG_Restart_Year_Short=40
     BG_Restart_Year=`printf %04d $BG_Restart_Year_Short`
-    BG_Forcing_Year_Start=XXX
+    BG_Forcing_Year_Start=10
     let BG_Forcing_Year_End=BG_Restart_Year_Short-1
     
     #Set name of simulation
@@ -159,13 +152,27 @@ exit
     ./xmlchange LND2GLC_FMAPNAME="cpl/gridmaps/fv0.9x1.25/map_fv0.9x1.25_TO_gland4km_blin.150514.nc"
 
 ####copy over JG restart files from previous BG run
-    GLOBIGNORE=*.cam.*:rpointer.atm #Don't copy over any atmospheric restart stuff.
-    #cp $BG_tm1_ArchiveDir/rest/0002-01-01-00000/* $JG_t_RunDir
-    cp $BG_tm1_ArchiveDir/rpointer.* $JG_t_RunDir
-    cp $BG_tm1_ArchiveDir/$PreviousBGCaseName.*r*$BG_Restart_Year* $JG_t_RunDir
-    cp $BG_tm1_ArchiveDir/$PreviousBGCaseName.cism.h."$BG_Restart_Year"-01-01-00000.nc $JG_t_RunDir 
-    cp $BG_tm1_ArchiveDir/$PreviousBGCaseName.cpl.hi."$BG_Restart_Year"-01-01-00000.nc $JG_t_RunDir    
-    GLOBIGNORE=
+    f=$BG_tm1_ArchiveDir/$PreviousBGCaseName.cice.r."$BG_Restart_Year"-01-01-00000.nc;      cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+    f=$BG_tm1_ArchiveDir/$PreviousBGCaseName.cism.r."$BG_Restart_Year"-01-01-00000.nc;      cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+    f=$BG_tm1_ArchiveDir/$PreviousBGCaseName.clm2.r."$BG_Restart_Year"-01-01-00000.nc;      cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+    f=$BG_tm1_ArchiveDir/$PreviousBGCaseName.clm2.rh0."$BG_Restart_Year"-01-01-00000.nc;    cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+    f=$BG_tm1_ArchiveDir/$PreviousBGCaseName.cpl.hi."$BG_Restart_Year"-01-01-00000.nc;      cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }    
+    f=$BG_tm1_ArchiveDir/$PreviousBGCaseName.cpl.r."$BG_Restart_Year"-01-01-00000.nc;       cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+#    f=$BG_tm1_ArchiveDir/$PreviousBGCaseName.datm.rs1."$BG_Restart_Year"-01-01-00000.bin;   cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+    f=$BG_tm1_ArchiveDir/$PreviousBGCaseName.mosart.r."$BG_Restart_Year"-01-01-00000.nc;    cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }    
+    f=$BG_tm1_ArchiveDir/$PreviousBGCaseName.mosart.rh0."$BG_Restart_Year"-01-01-00000.nc;  cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }     
+    f=$BG_tm1_ArchiveDir/$PreviousBGCaseName.pop.r."$BG_Restart_Year"-01-01-00000.nc;       cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+    f=$BG_tm1_ArchiveDir/$PreviousBGCaseName.pop.ro."$BG_Restart_Year"-01-01-00000;         cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }        
+    f=$BG_tm1_ArchiveDir/rpointer.drv;                                                      cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+    f=$BG_tm1_ArchiveDir/rpointer.glc;                                                      cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+    f=$BG_tm1_ArchiveDir/rpointer.ice;                                                      cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+    f=$BG_tm1_ArchiveDir/rpointer.lnd;                                                      cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+    f=$BG_tm1_ArchiveDir/rpointer.ocn.ovf;                                                  cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+    f=$BG_tm1_ArchiveDir/rpointer.ocn.restart;                                              cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }
+    f=$BG_tm1_ArchiveDir/rpointer.rof;                                                      cp -vf $f $JG_t_RunDir || { echo "copy of $f failed" ; exit 1; }    
+
+    #Ensure dates are correct (can be wrong if year previous to final year of JG run is used)
+    sed -i "s/[0-9]\{4\}-01-01-00000/"$BG_Restart_Year"-01-01-00000/g" $JG_t_RunDir/rpointer.*
 
 ###set component-specific restarting tweaks that aren't handled by default scripts for this scenario
     #CICE
@@ -177,20 +184,18 @@ exit
     ./xmlchange STOP_N=1
     ./xmlchange HIST_OPTION='nmonths'
     ./xmlchange HIST_N=1
-    ./xmlchange RESUBMIT=20
+    ./xmlchange RESUBMIT=149
     ./xmlchange JOB_QUEUE='regular'
     ./xmlchange JOB_WALLCLOCK_TIME='00:40'
     ./xmlchange PROJECT="$ProjCode"
 
 ###make some soft links for convenience 
-    ln -sf $JG_t_RunDir RunDir
-    ln -sf /glade/scratch/jfyke/archive/$CaseName ArchiveDir
+    ln -svf $JG_t_RunDir RunDir
+    ln -svf /glade/scratch/jfyke/archive/$CaseName ArchiveDir
+
+###copy esp_present=wav_present bugfix
+    cp -vf $D/SourceMods/seq_rest_mod.F90 SourceMods/src.drv
 
 ###build, submit
     ./case.build
     ./case.submit
-
-
-
-
-

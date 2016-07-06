@@ -176,8 +176,8 @@ D=$PWD
     ./xmlchange HIST_OPTION='nmonths'
     ./xmlchange HIST_N=1
     ./xmlchange RESUBMIT=2
-    ./xmlchange JOB_QUEUE='regular'
-    ./xmlchange JOB_WALLCLOCK_TIME='00:40'
+    ./xmlchange JOB_QUEUE='premium'
+    ./xmlchange JOB_WALLCLOCK_TIME='00:25'
     ./xmlchange PROJECT="$ProjCode"
 
 ###copy extra SourceMods
