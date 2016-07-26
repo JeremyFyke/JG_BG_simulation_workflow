@@ -3,7 +3,7 @@
 D=$PWD
 
 ###build up CaseNames, RunDirs, Archive Dirs, etc.
-    t=6
+    t=7
     let tm1=t-1
 
     BG_CaseName_Root=BG_iteration_
@@ -132,6 +132,13 @@ D=$PWD
               fi
 	   done
 	   wait
+	   for ftype in ha2x1hi ha2x1h ha2x3h ha2x1d; do
+	       for fname in `ls $BG_tm1_ArchiveDir/$PreviousBGCaseName.cpl.$ftype.$yr-$m-*.nc`; do 
+	           if [ -f $fname ]; then
+	               rm -v $fname
+                   fi
+	       done
+	   done	   
 	done
     done
     

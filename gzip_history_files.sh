@@ -1,15 +1,17 @@
 #!/bin/bash
 
-D=BG_iteration_2/RunDir
+#BSUB -P P93300301
+#BSUB -W 00:30               
+#BSUB -n 128                  
+#BSUB -J gzip_history        
+#BSUB -o gzip_history.%J.out 
+#BSUB -e gzip_history.%J.err 
+#BSUB -q regular         
 
-gzip -v $D/*cice.h* &
-gzip -v $D/*clm2.h* &
-gzip -v $D/*cpl.hi* &
-gzip -v $D/*mosart.h0* &
-gzip -v $D/*pop.h.00* &
-gzip -v $D/*pop.h.nday1* &
-gzip -v $D/*cam.h0* &
+module purge
+module load parallel
 
-wait
+D=/glade/scratch/jfyke/JG_iteration_3/run
 
+ls $D/*.nc | parallel gzip -f
 
