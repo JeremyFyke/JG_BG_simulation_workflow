@@ -3,14 +3,14 @@
 D=$PWD
 
 ###build up CaseNames, RunDirs, Archive Dirs, etc.
-    t=6
+    t=7
     let tm1=t-1
 
     BG_CaseName_Root=BG_iteration_
     JG_CaseName_Root=JG_iteration_
 
-    BG_Restart_Year=0040
-    JG_Restart_Year=0044
+    BG_Restart_Year=0041
+    JG_Restart_Year=0150
 
     CaseName=$BG_CaseName_Root"$t"
     PreviousJGCaseName=$JG_CaseName_Root"$t"
