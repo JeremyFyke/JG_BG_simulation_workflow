@@ -2,8 +2,12 @@
 
 D=$PWD
 
+echo 'NOTE: ice acceleration is ON'
+echo 'See if this dies after 1 year of running, under BG_iteration_4.  Figure out why if so.'
+echo 'Test to see if update to offset and change to linear interpolation in Solar worked, in comparing climatological distributions'
+
 ###build up CaseNames, RunDirs, Archive Dirs, etc.
-    t=7
+    t=5
     let tm1=t-1
 
     BG_CaseName_Root=BG_iteration_
@@ -14,13 +18,13 @@ D=$PWD
     let BG_Forcing_Year_End=BG_Restart_Year_Short-1
     
     #Set name of simulation
-    CaseName=$JG_CaseName_Root"$t"
+    CaseName=$JG_CaseName_Root"$t"_lower_corecount
     PreviousBGCaseName="$BG_CaseName_Root""$tm1"
     JG_t_RunDir=/glade/scratch/jfyke/$CaseName/run
     BG_tm1_ArchiveDir=/glade/scratch/jfyke/$PreviousBGCaseName/run
 
 ###set project code
-    ProjCode=P93300601
+    ProjCode=P93300301
     
 ###set up model
     #Set the source code from which to build model
@@ -35,43 +39,42 @@ D=$PWD
 
     #Change directories into the new experiment case directory
     cd $D/$CaseName
-    
-    ./xmlchange RUNDIR=$JG_t_RunDir
-    ./xmlchange NTASKS_ATM=30
-    ./xmlchange NTASKS_CPL=930
-    ./xmlchange NTASKS_GLC=1440
-    ./xmlchange NTASKS_ICE=300
-    ./xmlchange NTASKS_LND=630
-    ./xmlchange NTASKS_OCN=480
-    ./xmlchange NTASKS_ROF=630
-    ./xmlchange NTASKS_WAV=1
 
-    ./xmlchange ROOTPE_ATM=930
-    ./xmlchange ROOTPE_CPL=0
-    ./xmlchange ROOTPE_GLC=0
-    ./xmlchange ROOTPE_ICE=630
-    ./xmlchange ROOTPE_LND=0
-    ./xmlchange ROOTPE_OCN=960
-    ./xmlchange ROOTPE_ROF=0
-    ./xmlchange ROOTPE_WAV=0
-    
-#     ./xmlchange NTASKS_ATM=15
-#     ./xmlchange NTASKS_CPL=465
-#     ./xmlchange NTASKS_GLC=720
-#     ./xmlchange NTASKS_ICE=150
-#     ./xmlchange NTASKS_LND=315
-#     ./xmlchange NTASKS_OCN=240
-#     ./xmlchange NTASKS_ROF=315
+#     ./xmlchange NTASKS_ATM=30
+#     ./xmlchange NTASKS_CPL=930
+#     ./xmlchange NTASKS_GLC=1440
+#     ./xmlchange NTASKS_ICE=300
+#     ./xmlchange NTASKS_LND=630
+#     ./xmlchange NTASKS_OCN=480
+#     ./xmlchange NTASKS_ROF=630
 #     ./xmlchange NTASKS_WAV=1
 # 
-#     ./xmlchange ROOTPE_ATM=465
+#     ./xmlchange ROOTPE_ATM=930
 #     ./xmlchange ROOTPE_CPL=0
 #     ./xmlchange ROOTPE_GLC=0
-#     ./xmlchange ROOTPE_ICE=315
+#     ./xmlchange ROOTPE_ICE=630
 #     ./xmlchange ROOTPE_LND=0
-#     ./xmlchange ROOTPE_OCN=480
+#     ./xmlchange ROOTPE_OCN=960
 #     ./xmlchange ROOTPE_ROF=0
-#     ./xmlchange ROOTPE_WAV=0    
+#     ./xmlchange ROOTPE_WAV=0
+    
+    ./xmlchange NTASKS_ATM=15
+    ./xmlchange NTASKS_CPL=465
+    ./xmlchange NTASKS_GLC=720
+    ./xmlchange NTASKS_ICE=150
+    ./xmlchange NTASKS_LND=315
+    ./xmlchange NTASKS_OCN=240
+    ./xmlchange NTASKS_ROF=315
+    ./xmlchange NTASKS_WAV=1
+
+    ./xmlchange ROOTPE_ATM=465
+    ./xmlchange ROOTPE_CPL=0
+    ./xmlchange ROOTPE_GLC=0
+    ./xmlchange ROOTPE_ICE=315
+    ./xmlchange ROOTPE_LND=0
+    ./xmlchange ROOTPE_OCN=480
+    ./xmlchange ROOTPE_ROF=0
+    ./xmlchange ROOTPE_WAV=0	
     
 
     ./xmlchange RUN_TYPE='hybrid'
@@ -133,13 +136,6 @@ D=$PWD
               fi
 	   done
 	   wait
-	   for ftype in ha2x1hi ha2x1h ha2x3h ha2x1d; do
-	       for fname in $BG_tm1_ArchiveDir/$PreviousBGCaseName.cpl.$ftype.$yr-$m-*.nc; do 
-	           if [ -e "%fname" ]; then
-	               rm -v $fname
-                   fi
-	       done
-	   done	   
 	done
     done
     
@@ -192,38 +188,14 @@ D=$PWD
     ./xmlchange STOP_N=1
     ./xmlchange HIST_OPTION='nmonths'
     ./xmlchange HIST_N=1
-    ./xmlchange RESUBMIT=149
+    ./xmlchange RESUBMIT=2
     ./xmlchange JOB_QUEUE='regular'
-    ./xmlchange JOB_WALLCLOCK_TIME='00:30'
+    ./xmlchange JOB_WALLCLOCK_TIME='00:40'
     ./xmlchange PROJECT="$ProjCode"
 
 ###make some soft links for convenience 
     ln -svf $JG_t_RunDir RunDir
     ln -svf /glade/scratch/jfyke/archive/$CaseName ArchiveDir
-
-###copy esp_present=wav_present bugfix
-    cp -vf $D/SourceMods/seq_rest_mod.F90 SourceMods/src.drv
-
-###set up restoring
-    for m in `seq -f '%02g' 1 12`; do
-      echo 'Calculating monthly restoring SSS climatology for month: ' $m
-      flist=""
-      for yr in `seq -f '%04g' $BG_Forcing_Year_Start $BG_Forcing_Year_End`; do
-	flist="$flist $BG_tm1_ArchiveDir/$PreviousBGCaseName.pop.h.$yr-$m.nc"
-      done    
-      ncra -F -v SALT -d z_t,1,1,1 $flist $BG_tm1_ArchiveDir/SSS_FLXIO_$m.nc
-      ncra -A -F -v SALT_F $flist $BG_tm1_ArchiveDir/SSS_FLXIO_$m.nc
-    done
-
-    ncrcat -O $BG_tm1_ArchiveDir/SSS_FLXIO_* $BG_tm1_ArchiveDir/temp.nc
-    ncrename -v SALT,SSS $BG_tm1_ArchiveDir/temp.nc
-    ncrename -v SALT_F,FLXIO $BG_tm1_ArchiveDir/temp.nc
-    ncwa -a z_t temp.nc climo_SSS_FLXIO.nc
-    rm $BG_tm1_ArchiveDir/SSS_FLXIO_* temp.nc
-    
-    echo "sfwf_filename='$BG_tm1_ArchiveDir/climo_SSS_FLXIO.nc'" >> user_nl_pop
-    echo "sfwf_file_fmt='nc'" >> user_nl_pop
-    echo "sfwf_data_type='monthly'" >> user_nl_pop
 
 ###build, submit
     ./case.build

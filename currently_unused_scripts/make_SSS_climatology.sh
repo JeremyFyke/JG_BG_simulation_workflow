@@ -17,7 +17,6 @@ JG_t_RunDir=/glade/scratch/jfyke/$CaseName/run
 BG_tm1_ArchiveDir=/glade/scratch/jfyke/$PreviousBGCaseName/run
 
 
-
 for m in `seq -f '%02g' 1 12`; do
   echo $m
   flist=""
@@ -29,3 +28,4 @@ for m in `seq -f '%02g' 1 12`; do
 done
 
 ncrcat SSS_* climo_SSS.nc
+rm SSS_*

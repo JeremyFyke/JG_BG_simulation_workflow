@@ -764,9 +764,9 @@ contains
                 !      domain%data%rAttr(j1,n),domain%data%rAttr(j2,n),' in ',n,gridsize
                 !endif
              else
-                write(logunit,*) trim(subname),' ERROR area,aream= ', &
-                     rarea,raream,' in ',n,gridsize
-                call shr_sys_flush(logunit)
+                !write(logunit,*) trim(subname),' ERROR area,aream= ', &
+                !     rarea,raream,' in ',n,gridsize
+                !call shr_sys_flush(logunit)
                 !call shr_sys_abort()
              endif
           endif

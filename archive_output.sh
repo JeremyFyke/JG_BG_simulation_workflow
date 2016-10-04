@@ -1,8 +1,9 @@
 #!/bin/bash
 
 S=/glade/scratch/jfyke
-for i in JG BG; do
-   for n in 6 7; do
+#for i in JG BG; do
+for i in JG; do
+   for n in 7_restoring; do
        D="$i"_iteration_"$n"
        echo "Submitting archiving job for" $S/$D/run
        if [ -d $S/$D ]; then

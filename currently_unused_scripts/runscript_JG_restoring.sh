@@ -14,7 +14,7 @@ D=$PWD
     let BG_Forcing_Year_End=BG_Restart_Year_Short-1
     
     #Set name of simulation
-    CaseName=$JG_CaseName_Root"$t"
+    CaseName=$JG_CaseName_Root"$t"_restoring
     PreviousBGCaseName="$BG_CaseName_Root""$tm1"
     JG_t_RunDir=/glade/scratch/jfyke/$CaseName/run
     BG_tm1_ArchiveDir=/glade/scratch/jfyke/$PreviousBGCaseName/run
@@ -192,7 +192,7 @@ D=$PWD
     ./xmlchange STOP_N=1
     ./xmlchange HIST_OPTION='nmonths'
     ./xmlchange HIST_N=1
-    ./xmlchange RESUBMIT=149
+    ./xmlchange RESUBMIT=50
     ./xmlchange JOB_QUEUE='regular'
     ./xmlchange JOB_WALLCLOCK_TIME='00:30'
     ./xmlchange PROJECT="$ProjCode"
