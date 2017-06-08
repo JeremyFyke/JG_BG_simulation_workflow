@@ -3,14 +3,14 @@
 D=$PWD
 
 ###build up CaseNames, RunDirs, Archive Dirs, etc.
-    t=7
+    t=8
     let tm1=t-1
 
     BG_CaseName_Root=BG_iteration_
     JG_CaseName_Root=JG_iteration_
-    BG_Restart_Year_Short=40
+    BG_Restart_Year_Short=37
     BG_Restart_Year=`printf %04d $BG_Restart_Year_Short`
-    BG_Forcing_Year_Start=10
+    BG_Forcing_Year_Start=9
     let BG_Forcing_Year_End=BG_Restart_Year_Short-1
     
     #Set name of simulation
@@ -20,7 +20,7 @@ D=$PWD
     BG_tm1_ArchiveDir=/glade/scratch/jfyke/$PreviousBGCaseName/run
 
 ###set project code
-    ProjCode=P93300601
+    ProjCode=P93300624
     
 ###set up model
     #Set the source code from which to build model
@@ -194,7 +194,7 @@ D=$PWD
     ./xmlchange HIST_N=1
     ./xmlchange RESUBMIT=149
     ./xmlchange JOB_QUEUE='regular'
-    ./xmlchange JOB_WALLCLOCK_TIME='00:30'
+    ./xmlchange JOB_WALLCLOCK_TIME='00:45'
     ./xmlchange PROJECT="$ProjCode"
 
 ###make some soft links for convenience 
@@ -218,8 +218,13 @@ D=$PWD
     ncrcat -O $BG_tm1_ArchiveDir/SSS_FLXIO_* $BG_tm1_ArchiveDir/temp.nc
     ncrename -v SALT,SSS $BG_tm1_ArchiveDir/temp.nc
     ncrename -v SALT_F,FLXIO $BG_tm1_ArchiveDir/temp.nc
-    ncwa -a z_t temp.nc climo_SSS_FLXIO.nc
-    rm $BG_tm1_ArchiveDir/SSS_FLXIO_* temp.nc
+    ncwa -O -a z_t $BG_tm1_ArchiveDir/temp.nc $BG_tm1_ArchiveDir/climo_SSS_FLXIO.nc
+    rm $BG_tm1_ArchiveDir/SSS_FLXIO_* $BG_tm1_ArchiveDir/temp.nc
+
+    if [ ! -f $BG_tm1_ArchiveDir/climo_SSS_FLXIO.nc ]; then
+      echo 'Error: something wrong with climo_SSS_FLXIO.nc creation'
+      exit
+    fi
     
     echo "sfwf_filename='$BG_tm1_ArchiveDir/climo_SSS_FLXIO.nc'" >> user_nl_pop
     echo "sfwf_file_fmt='nc'" >> user_nl_pop

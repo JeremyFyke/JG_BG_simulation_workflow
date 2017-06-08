@@ -3,7 +3,7 @@
 D=$PWD
 
 ###build up CaseNames, RunDirs, Archive Dirs, etc.
-    t=7
+    t=8
     let tm1=t-1
 
     BG_CaseName_Root=BG_iteration_
@@ -13,12 +13,15 @@ D=$PWD
     JG_Restart_Year=0151
 
     CaseName=$BG_CaseName_Root"$t"
-    PreviousJGCaseName=$JG_CaseName_Root"$t"_restoring
+    PreviousJGCaseName=$JG_CaseName_Root"$t"
     PreviousBGCaseName="$BG_CaseName_Root""$tm1"
        
     BG_t_RunDir=/glade/scratch/jfyke/$CaseName/run
     JG_t_RunDir=/glade/scratch/jfyke/$PreviousJGCaseName/run
-    BG_tm1_RunDir=/glade/scratch/lipscomb/$PreviousBGCaseName/run   
+    BG_tm1_RunDir=/glade/scratch/jfyke/$PreviousBGCaseName/run   
+
+###set project code
+    ProjCode=P93300624
 
 ###set up model
     #Set the source code from which to build model
@@ -174,7 +177,7 @@ D=$PWD
     ./xmlchange RESUBMIT=39
     ./xmlchange JOB_QUEUE='regular'
     ./xmlchange JOB_WALLCLOCK_TIME='04:00'
-    ./xmlchange PROJECT='P93300601'    
+    ./xmlchange PROJECT="$ProjCode"    
 
 ###make some soft links for convenience
     ln -s $BG_t_RunDir RunDir

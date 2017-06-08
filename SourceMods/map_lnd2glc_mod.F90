@@ -405,7 +405,6 @@ contains
     data_g_ice_covered(:)=0._r8
     
     do n=1,lsize_g
-    
        !for each ice sheet point, find bounding EC values...
        if (topo_g(n) .lt. topo_g_EC(n,1)) then !lower than lowest mean EC elevation value
 	  data_g_ice_covered(n)=data_g_EC(n,1)
